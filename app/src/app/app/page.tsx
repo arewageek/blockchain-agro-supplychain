@@ -75,10 +75,6 @@ export default function DashboardPage() {
     const [productInfo, setProductInfo] = useState<IProduct | null>()
     const [isQRDialogOpen, setIsQRDialogOpen] = useState(false)
 
-    if (status === 'loading') {
-        return <div>Loading...</div>
-    }
-
     const handleProductSearch = (e: React.FormEvent) => {
         e.preventDefault()
         const productSelection = dummyProducts.find(product => product.id == productId)
