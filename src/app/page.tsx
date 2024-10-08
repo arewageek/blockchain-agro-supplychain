@@ -5,8 +5,9 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Leaf, Scan, Users, Factory, Store, ShoppingCart } from 'lucide-react'
+import { Leaf, Scan, Users, Factory, Store, ShoppingCart, Rocket } from 'lucide-react'
 import Appbar from '@/components/layout/Appbar'
+import ConnectButton from '@/components/layout/ConnectButton'
 
 export default function Home() {
   const [isQRDialogOpen, setIsQRDialogOpen] = useState(false)
@@ -35,13 +36,12 @@ export default function Home() {
           </p>
           <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
             <div className="rounded-md shadow">
-              <Link href="/login" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-10">
-                Get Started
-              </Link>
+              <ConnectButton classes='w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-10 h-full' />
             </div>
             <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
-              <Link href="/register" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
-                Register
+              <Link href="/app" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10 h-full gap-x-2">
+                Launch App
+                <Rocket />
               </Link>
             </div>
           </div>
@@ -73,7 +73,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mt-16">
+        <div className="mt-16" id="scan">
           <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-8">Track Your Product</h2>
           <div className="max-w-md mx-auto">
             <form onSubmit={handleProductSearch} className="flex items-center">

@@ -14,7 +14,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-const ConnectButton = () => {
+const ConnectButton = ({ classes }: { classes?: string }) => {
     const { address, status } = useAccount()
     const { connect, connectors } = useConnect()
     const { disconnect } = useDisconnect()
@@ -22,10 +22,10 @@ const ConnectButton = () => {
     const [position, setPosition] = useState("bottom")
 
     return (
-        <div>
+        <div className='h-full flex items-center justify-center'>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
+                    <Button variant="outline" className={classes}>
                         {status == 'disconnected' ? "Connect Wallet" : status == 'connected' ? `${address.substring(0, 5)}...${address.substring(address.length - 6)}` : `${status}...`}
                     </Button>
                 </DropdownMenuTrigger>
@@ -59,5 +59,9 @@ const ConnectButton = () => {
         </div>
     )
 }
+
+// export const ConnectButton2 = () => {
+//     <
+// }
 
 export default ConnectButton
