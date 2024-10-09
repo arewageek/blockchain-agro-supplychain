@@ -4,12 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 const data = [
-    { name: 'Jan', amount: 2400 },
-    { name: 'Feb', amount: 1398 },
-    { name: 'Mar', amount: 9800 },
-    { name: 'Apr', amount: 3908 },
-    { name: 'May', amount: 4800 },
-    { name: 'Jun', amount: 3800 },
+    { name: 'Oct 23', amount: 3200 },
+    { name: 'Nov 23', amount: 2800 },
+    { name: 'Dec 23', amount: 2400 },
+    { name: 'Jan 24', amount: 2200 },
+    { name: 'Feb 24', amount: 2600 },
+    { name: 'Mar 24', amount: 3100 },
+    { name: 'Apr 24', amount: 3500 },
+    { name: 'May 24', amount: 4200 },
+    { name: 'Jun 24', amount: 4800 },
+    { name: 'Jul 24', amount: 5100 },
+    { name: 'Aug 24', amount: 4900 },
+    { name: 'Sep 24', amount: 4500 },
+    { name: 'Oct 24', amount: 4200 },
 ]
 
 export default function FarmerStats() {
@@ -91,7 +98,7 @@ export default function FarmerStats() {
             </div>
             <Card>
                 <CardHeader>
-                    <CardTitle>Monthly Revenue</CardTitle>
+                    <CardTitle>Monthly Revenue (Oct 2023 - Oct 2024)</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>

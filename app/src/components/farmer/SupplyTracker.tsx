@@ -8,7 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, CheckCircle2, Truck, Package } from "lucide-react"
+import { Loader2, CheckCircle2, Truck, Package, Weight, Pin, Compass, Calendar } from "lucide-react"
+import { readContract } from '@wagmi/core'
+import { configWagmi, contractConfig } from '@/config/wagmi.config'
+import { toast } from 'react-toastify'
 
 const formSchema = z.object({
     supplyId: z.string().min(1, {
@@ -17,7 +20,7 @@ const formSchema = z.object({
 })
 
 export default function SupplyTracker() {
-    const [supplyStatus, setSupplyStatus] = useState(null)
+    const [supplyStatus, setSupplyStatus] = useState<null | any>(null)
     const [isLoading, setIsLoading] = useState(false)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -30,12 +33,30 @@ export default function SupplyTracker() {
         setIsLoading(true)
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1500))
-        setSupplyStatus({
-            id: values.supplyId,
-            status: "In Transit",
-            location: "Distribution Center",
-            lastUpdated: new Date().toLocaleString(),
+        // setSupplyStatus({
+        //     id: values.supplyId,
+        //     status: "In Transit",
+        //     location: "Distribution Center",
+        //     lastUpdated: new Date().toLocaleString(),
+        // })
+
+        const supply = await readContract(configWagmi, {
+            ...contractConfig,
+            functionName: 'bulkSupplies',
+            args: [values.supplyId]
         })
+        const addy = supply[2]
+        if (addy == "0x0000000000000000000000000000000000000000") {
+            toast.error("Could not find the supply data")
+            setSupplyStatus(null)
+        }
+        else {
+            setSupplyStatus(supply)
+            console.log({ supply })
+        }
+
+
+
         setIsLoading(false)
     }
 
@@ -80,22 +101,50 @@ export default function SupplyTracker() {
                     <CardContent className="space-y-2">
                         <p className="flex items-center space-x-2">
                             <span className="font-semibold">ID:</span>
-                            <span>{supplyStatus.id}</span>
+                            <span>{Number(supplyStatus[0])}</span>
                         </p>
                         <p className="flex items-center space-x-2">
-                            <span className="font-semibold">Status:</span>
+                            <span className="font-semibold">Name:</span>
                             <span className="flex items-center space-x-1">
-                                <Truck className="w-4 h-4 text-blue-500" />
-                                <span>{supplyStatus.status}</span>
+                                {/* <Truck className="w-4 h-4 text-green-500" /> */}
+                                <span>{supplyStatus[1]}</span>
                             </span>
                         </p>
                         <p className="flex items-center space-x-2">
-                            <span className="font-semibold">Location:</span>
-                            <span>{supplyStatus.location}</span>
+                            <span className="font-semibold">Farmer:</span>
+                            <span>{supplyStatus[2]}</span>
                         </p>
                         <p className="flex items-center space-x-2">
-                            <span className="font-semibold">Last Updated:</span>
-                            <span>{supplyStatus.lastUpdated}</span>
+                            <span className="font-semibold">Quantity:</span>
+                            <span>{Number(supplyStatus[3])}</span>
+                        </p>
+
+                        <p className="flex items-center space-x-2">
+                            <span className="font-semibold">Unit:</span>
+                            <Weight className="w-4 h-4 text-green-500" />
+                            <span>{supplyStatus[4]}</span>
+                        </p>
+
+                        <p className="flex items-center space-x-2">
+                            <span className="font-semibold">Price Per Unit:</span>
+                            <span>${Number(supplyStatus[5]).toLocaleString()}</span>
+                        </p>
+
+                        <p className="flex items-center space-x-2">
+                            <span className="font-semibold">Factory Location:</span>
+                            <Compass className="w-4 h-4 text-green-500" />
+                            <span>{supplyStatus[6]}</span>
+                        </p>
+
+                        <p className="flex items-center space-x-2">
+                            <span className="font-semibold">Harvest Date:</span>
+                            <Calendar className="w-4 h-4 text-green-500" />
+                            <span>{Number(supplyStatus[7])}</span>
+                        </p>
+
+                        <p className="flex items-center space-x-2">
+                            <span className="font-semibold">Status:</span>
+                            <span>{supplyStatus[8]}</span>
                         </p>
                     </CardContent>
                 </Card>

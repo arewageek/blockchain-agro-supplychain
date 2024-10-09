@@ -15,7 +15,7 @@ const AuthRedirectProvider = ({ children }: { children: ReactNode }) => {
             {
                 ...contractConfig,
                 functionName: 'role',
-                args: ["0xd349d66c50131422F5f7D1220798F55981E15c50"],
+                args: [`${address}`],
             }
         ]
     })
@@ -26,7 +26,7 @@ const AuthRedirectProvider = ({ children }: { children: ReactNode }) => {
     }, [data])
 
     useEffect(() => {
-        role && role !== 'CUSTOMER' && router.push(`${role.toLowerCase()}`)
+        role && role != 'CUSTOMER' && router.push(`${role.toLowerCase()}`)
     }, [role])
 
     return (

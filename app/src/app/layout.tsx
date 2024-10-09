@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Web3Provider from "@/providers/Web3Provider";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/ReactToastify.css'
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,6 +35,7 @@ export default function RootLayout({
           <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100">
             {children}
           </div>
+          <ToastContainer />
         </body>
       </html>
     </Web3Provider>

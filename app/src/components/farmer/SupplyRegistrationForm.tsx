@@ -1,105 +1,181 @@
 'use client'
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
+import { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, CheckCircle2, Truck, Package } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { toast } from 'react-toastify'
+import { Loader2 } from "lucide-react"
+import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
+import { contractConfig } from '@/config/wagmi.config'
 
-const formSchema = z.object({
-    supplyId: z.string().min(1, {
-        message: "Supply ID is required.",
-    }),
-})
-
-export default function SupplyTracker() {
-    const [supplyStatus, setSupplyStatus] = useState(null)
-    const [isLoading, setIsLoading] = useState(false)
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            supplyId: "",
-        },
+export default function SupplyRegistrationForm() {
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [formData, setFormData] = useState({
+        productName: "",
+        quantity: "",
+        unit: "",
+        processor: "",
+        harvestDate: "",
+        factoryLocation: "",
+        pricePerUnit: 0
     })
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
-        setIsLoading(true)
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500))
-        setSupplyStatus({
-            id: values.supplyId,
-            status: "In Transit",
-            location: "Distribution Center",
-            lastUpdated: new Date().toLocaleString(),
-        })
-        setIsLoading(false)
+    const data = useWriteContract()
+
+    const handleChange = (e: any) => {
+        const { name, value } = e.target
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }))
     }
 
-    return (
-        <div className="space-y-6">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                        control={form.control}
-                        name="supplyId"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Supply ID</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Enter supply ID" {...field} className="bg-green-50 dark:bg-green-900" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isLoading}>
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Tracking...
-                            </>
-                        ) : (
-                            'Track Supply'
-                        )}
-                    </Button>
-                </form>
-            </Form>
+    const handleSelectChange = (name: string, value: string | number) => {
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }))
+    }
 
-            {supplyStatus && (
-                <Card className="bg-white dark:bg-gray-800 border-green-200 dark:border-green-700">
-                    <CardHeader>
-                        <CardTitle className="text-green-700 dark:text-green-300 flex items-center space-x-2">
-                            <Package className="w-6 h-6" />
-                            <span>Supply Status</span>
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                        <p className="flex items-center space-x-2">
-                            <span className="font-semibold">ID:</span>
-                            <span>{supplyStatus.id}</span>
-                        </p>
-                        <p className="flex items-center space-x-2">
-                            <span className="font-semibold">Status:</span>
-                            <span className="flex items-center space-x-1">
-                                <Truck className="w-4 h-4 text-blue-500" />
-                                <span>{supplyStatus.status}</span>
-                            </span>
-                        </p>
-                        <p className="flex items-center space-x-2">
-                            <span className="font-semibold">Location:</span>
-                            <span>{supplyStatus.location}</span>
-                        </p>
-                        <p className="flex items-center space-x-2">
-                            <span className="font-semibold">Last Updated:</span>
-                            <span>{supplyStatus.lastUpdated}</span>
-                        </p>
-                    </CardContent>
-                </Card>
-            )}
-        </div>
+    const handleSubmit = async (e: any) => {
+        e.preventDefault()
+        setIsSubmitting(true)
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        console.log({ formData })
+        toast.success("Your supply has been successfully registered.", {
+            className: 'bg-green-600 text-white dark:bg-green-700',
+        })
+        setFormData({
+            productName: "",
+            quantity: "",
+            unit: "",
+            processor: "",
+            factoryLocation: "",
+            harvestDate: "",
+            pricePerUnit: 0
+        })
+
+        const { productName, factoryLocation, harvestDate, pricePerUnit, processor, quantity, unit } = formData
+
+        data.writeContract({
+            ...contractConfig,
+            functionName: 'registerBulkSupply',
+            args: [productName, BigInt(parseInt(quantity)), unit, BigInt(pricePerUnit), factoryLocation, Date.now()]
+        })
+
+        setIsSubmitting(false)
+    }
+
+    useEffect(() => {
+        console.log({ hsh: data.data, error: data.error })
+        if (data.isError) {
+            toast.error(data.error.name)
+        }
+    }, [data.data])
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+                <Label htmlFor="productName">Product Name</Label>
+                <Input
+                    id="productName"
+                    name="productName"
+                    value={formData.productName}
+                    onChange={handleChange}
+                    placeholder="e.g., Organic Apples"
+                    className="bg-green-50 dark:bg-green-900"
+                />
+            </div>
+            <div className="flex space-x-4">
+                <div className="flex-1">
+                    <Label htmlFor="quantity">Quantity</Label>
+                    <Input
+                        id="quantity"
+                        name="quantity"
+                        type="number"
+                        value={formData.quantity}
+                        onChange={handleChange}
+                        className="bg-green-50 dark:bg-green-900"
+                    />
+                </div>
+                <div className="flex-1">
+                    <Label htmlFor="unit">Unit</Label>
+                    <Select onValueChange={(value) => handleSelectChange("unit", value)} value={formData.unit}>
+                        <SelectTrigger className="bg-green-50 dark:bg-green-900">
+                            <SelectValue placeholder="Select a unit" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="kg">Kilograms (kg)</SelectItem>
+                            <SelectItem value="ton">Tons</SelectItem>
+                            <SelectItem value="lb">Pounds (lb)</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className='flex-1'>
+                    <Label htmlFor="pricePerUnit">Price Per Unit</Label>
+                    <Input
+                        id="pricePerUnit"
+                        name="pricePerUnit"
+                        type="number"
+                        value={formData.pricePerUnit}
+                        onChange={handleChange}
+                        placeholder="e.g., $300"
+                        className="bg-green-50 dark:bg-green-900"
+                    />
+                </div>
+            </div>
+            {/* <div>
+                <Label htmlFor="processor">Processor</Label>
+                <Select onValueChange={(value) => handleSelectChange("processor", value)} value={formData.processor}>
+                    <SelectTrigger className="bg-green-50 dark:bg-green-900">
+                        <SelectValue placeholder="Select a processor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="processor1">Green Valley Foods</SelectItem>
+                        <SelectItem value="processor2">Farm Fresh Processors</SelectItem>
+                        <SelectItem value="processor3">Organic Harvest Co.</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div> */}
+
+            <div>
+                <Label htmlFor="productName">Factory Location</Label>
+                <Input
+                    id="factoryLocation"
+                    name="factoryLocation"
+                    value={formData.factoryLocation}
+                    onChange={handleChange}
+                    placeholder="e.g., GIdan Kwano, Minna, Niger State"
+                    className="bg-green-50 dark:bg-green-900"
+                />
+            </div>
+
+            <div>
+                <Label htmlFor="harvestDate">Factory Location</Label>
+                <Input
+                    id="harvestDate"
+                    name="harvestDate"
+                    value={formData.harvestDate}
+                    type="date"
+                    onChange={handleChange}
+                    placeholder="e.g., GIdan Kwano, Minna, Niger State"
+                    className="bg-green-50 dark:bg-green-900"
+                />
+            </div>
+
+            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isSubmitting}>
+                {isSubmitting ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Registering...
+                    </>
+                ) : (
+                    'Register Supply'
+                )}
+            </Button>
+        </form>
     )
 }
