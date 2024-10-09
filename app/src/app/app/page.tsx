@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Scan, Leaf } from 'lucide-react'
+import AuthRedirectProvider from '@/providers/AuthRedirectProvider'
 
 // Dummy data for product information
 interface IProduct {
@@ -94,80 +95,82 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100 p-8">
-            <div className="max-w-4xl mx-auto">
-                <h1 className="text-3xl font-bold mb-8 text-center">Product Tracking Dashboard</h1>
+        <AuthRedirectProvider>
+            <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100 p-8">
+                <div className="max-w-4xl mx-auto">
+                    <h1 className="text-3xl font-bold mb-8 text-center">Product Tracking Dashboard</h1>
 
-                <Card className="mb-8">
-                    <CardHeader>
-                        <CardTitle>Track a Product</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleProductSearch} className="flex items-center space-x-2">
-                            <Input
-                                type="text"
-                                placeholder="Enter Product ID"
-                                value={productId}
-                                onChange={(e) => setProductId(e.target.value)}
-                                className="flex-grow"
-                            />
-                            <Button type="submit">Track</Button>
-                            <Dialog open={isQRDialogOpen} onOpenChange={setIsQRDialogOpen}>
-                                <DialogTrigger asChild>
-                                    <Button variant="outline">
-                                        <Scan className="h-5 w-5 mr-2" />
-                                        Scan QR
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>Scan QR Code</DialogTitle>
-                                    </DialogHeader>
-                                    <div className="flex items-center justify-center h-64 bg-gray-100 rounded-md">
-                                        <Button onClick={handleQRScan}>Simulate QR Scan</Button>
-                                    </div>
-                                </DialogContent>
-                            </Dialog>
-                        </form>
-                    </CardContent>
-                </Card>
-
-                {productInfo && (
-                    <Card>
+                    <Card className="mb-8">
                         <CardHeader>
-                            <CardTitle>Product Information</CardTitle>
+                            <CardTitle>Track a Product</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <h3 className="font-semibold">Product Name</h3>
-                                    <p>{productInfo.name}</p>
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Farmer</h3>
-                                    <p>{productInfo.farmer}</p>
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Harvest Date</h3>
-                                    <p>{productInfo.harvestDate}</p>
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Processing Date</h3>
-                                    <p>{productInfo.processingDate}</p>
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Distributor</h3>
-                                    <p>{productInfo.distributor}</p>
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Retailer</h3>
-                                    <p>{productInfo.retailer}</p>
-                                </div>
-                            </div>
+                            <form onSubmit={handleProductSearch} className="flex items-center space-x-2">
+                                <Input
+                                    type="text"
+                                    placeholder="Enter Product ID"
+                                    value={productId}
+                                    onChange={(e) => setProductId(e.target.value)}
+                                    className="flex-grow"
+                                />
+                                <Button type="submit">Track</Button>
+                                <Dialog open={isQRDialogOpen} onOpenChange={setIsQRDialogOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline">
+                                            <Scan className="h-5 w-5 mr-2" />
+                                            Scan QR
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>Scan QR Code</DialogTitle>
+                                        </DialogHeader>
+                                        <div className="flex items-center justify-center h-64 bg-gray-100 rounded-md">
+                                            <Button onClick={handleQRScan}>Simulate QR Scan</Button>
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
+                            </form>
                         </CardContent>
                     </Card>
-                )}
+
+                    {productInfo && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Product Information</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <h3 className="font-semibold">Product Name</h3>
+                                        <p>{productInfo.name}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold">Farmer</h3>
+                                        <p>{productInfo.farmer}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold">Harvest Date</h3>
+                                        <p>{productInfo.harvestDate}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold">Processing Date</h3>
+                                        <p>{productInfo.processingDate}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold">Distributor</h3>
+                                        <p>{productInfo.distributor}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold">Retailer</h3>
+                                        <p>{productInfo.retailer}</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
             </div>
-        </div>
+        </AuthRedirectProvider>
     )
 }

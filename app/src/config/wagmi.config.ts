@@ -1,22 +1,18 @@
 import { http, createConfig } from "wagmi";
 import { sepolia } from "wagmi/chains";
-import {
-  coinbaseWallet,
-  injected,
-  metaMask,
-  walletConnect,
-} from "wagmi/connectors";
+import { coinbaseWallet, metaMask } from "wagmi/connectors";
+import farmSupplyChain from "@/abi/FarmSupplyChain.json";
 
 export const configWagmi = createConfig({
   chains: [sepolia],
   transports: {
     [sepolia.id]: http(),
   },
-  connectors: [
-    metaMask(),
-    coinbaseWallet(),
-    // walletConnect({
-    //   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
-    // }),
-  ],
+  connectors: [metaMask(), coinbaseWallet()],
+  ssr: true,
 });
+
+export const contractConfig = {
+  address: "0x194E2170f1f81314E3264da7A4150384D9323B20",
+  abi: farmSupplyChain.abi,
+} as const;

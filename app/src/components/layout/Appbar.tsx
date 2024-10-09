@@ -12,7 +12,7 @@ const Appbar = () => {
                     <div className="flex">
                         <Link href="/" className="flex-shrink-0 flex items-center">
                             <Leaf className="h-8 w-8 text-green-600" />
-                            <span className="ml-2 text-xl font-bold text-gray-800">FarmChain</span>
+                            <span className="ml-2 text-xl font-bold text-gray-800">Abdul Aminu</span>
                         </Link>
                     </div>
                     <div className="flex items-center">
