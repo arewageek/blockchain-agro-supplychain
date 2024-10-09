@@ -9,8 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Timeline, TimelineItem, TimelineIcon, TimelineConnector, TimelineContent } from "@/components/ui/timeline"
 import { Loader2, Search, Leaf, Factory, Truck, Store } from "lucide-react"
+import { Timeline, TimelineConnector, TimelineContent, TimelineIcon, TimelineItem } from '../ui/timeline'
 
 const formSchema = z.object({
     itemId: z.string().min(1, {
@@ -19,7 +19,7 @@ const formSchema = z.object({
 })
 
 export default function ItemTracking() {
-    const [itemStatus, setItemStatus] = useState(null)
+    const [itemStatus, setItemStatus] = useState<any>(null)
     const [isLoading, setIsLoading] = useState(false)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -109,7 +109,7 @@ export default function ItemTracking() {
                         <div className="mt-4">
                             <h4 className="font-semibold mb-2">Item History:</h4>
                             <Timeline>
-                                {itemStatus.history.map((event, index) => (
+                                {itemStatus.history.map((event: any, index: number) => (
                                     <TimelineItem key={index}>
                                         <TimelineIcon>
                                             {event.event === "Harvested" && <Leaf className="h-4 w-4" />}

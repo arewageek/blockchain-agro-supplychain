@@ -18,7 +18,7 @@ const formSchema = z.object({
 })
 
 export default function BatchTracking() {
-    const [batchStatus, setBatchStatus] = useState(null)
+    const [batchStatus, setBatchStatus] = useState<any>(null)
     const [isLoading, setIsLoading] = useState(false)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -116,7 +116,7 @@ export default function BatchTracking() {
                         <div className="mt-4">
                             <h4 className="font-semibold mb-2">Items in Batch:</h4>
                             <ul className="space-y-2">
-                                {batchStatus.items.map((item) => (
+                                {batchStatus.items.map((item: any) => (
                                     <li key={item.id} className="flex justify-between items-center bg-green-50 dark:bg-green-900 p-2 rounded">
                                         <span>{item.name}</span>
                                         <Badge variant="secondary">{item.quantity}</Badge>

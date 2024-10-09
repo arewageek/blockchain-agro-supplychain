@@ -40,12 +40,12 @@ export default function SupplyTracker() {
         //     lastUpdated: new Date().toLocaleString(),
         // })
 
-        const supply = await readContract(configWagmi, {
+        const supply: any = await readContract(configWagmi, {
             ...contractConfig,
             functionName: 'bulkSupplies',
             args: [values.supplyId]
         })
-        const addy = supply[2]
+        const addy = supply[2] as string
         if (addy == "0x0000000000000000000000000000000000000000") {
             toast.error("Could not find the supply data")
             setSupplyStatus(null)

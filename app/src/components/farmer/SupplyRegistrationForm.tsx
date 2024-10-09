@@ -44,10 +44,7 @@ export default function SupplyRegistrationForm() {
         setIsSubmitting(true)
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000))
-        console.log({ formData })
-        toast.success("Your supply has been successfully registered.", {
-            className: 'bg-green-600 text-white dark:bg-green-700',
-        })
+
         setFormData({
             productName: "",
             quantity: "",
@@ -73,6 +70,11 @@ export default function SupplyRegistrationForm() {
         console.log({ hsh: data.data, error: data.error })
         if (data.isError) {
             toast.error(data.error.name)
+        }
+        else if (data.isSuccess) {
+            toast.success("Your supply has been successfully registered.", {
+                className: 'bg-green-600 text-white dark:bg-green-700',
+            })
         }
     }, [data.data])
 
