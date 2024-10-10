@@ -1,15 +1,16 @@
 "use client"
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Leaf, LoaderPinwheel, Package, Truck } from 'lucide-react';
-import { useAccount, useConnect } from 'wagmi';
+import { useAccount, useConnect, useWriteContract } from 'wagmi';
 import { configWagmi, contractConfig } from '@/config/wagmi.config';
 import { writeContract } from '@wagmi/core';
+import { toast } from 'react-toastify';
 
 // Define the SupplyState enum
 enum SupplyState {
@@ -60,6 +61,8 @@ export default function ProcessorDashboard() {
         averageQualityGrade: 'A'
     });
 
+    const { writeContract, error, isError, isPending, data: trxHash, isSuccess, context } = useWriteContract()
+
     const handleTrackBatch = async () => {
         // TODO: Implement actual blockchain tracking logic
         // This is a placeholder for demonstration purposes
@@ -90,22 +93,30 @@ export default function ProcessorDashboard() {
         };
 
         console.log({ newBatch })
-        const createBatch = await writeContract(configWagmi, {
+
+        writeContract({
             ...contractConfig,
             functionName: 'processBatch',
-            args: [
-                344,
-                29
-            ]
+            args: [BigInt(1), BigInt(1)]
         })
-
-        console.log({ createBatch })
 
     }
 
     // wagmi hooks
     const { address, isConnecting } = useAccount()
     const { connectors } = useConnect()
+
+    // contract effects
+    useEffect(() => {
+        console.log({ isPending, isError, error, trxHash, context })
+        if (isError) {
+            toast.error(error.name)
+        }
+        if (isSuccess) {
+            toast.success("Transaction has been submit")
+        }
+
+    }, [isPending, error, trxHash, isSuccess])
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -215,7 +226,9 @@ export default function ProcessorDashboard() {
                                 </Select>
                             </div>
                             {
-                                address ? <Button type="submit" className="w-full">Create Batch</Button> :
+                                address ? <Button type="submit" className="w-full">{
+                                    isPending ? "Processing..." : "Create Batch"
+                                }</Button> :
                                     <Button type="button" className="w-full" onClick={() => connectors[0].connect()}>
                                         {isConnecting ? "Connecting..." : "Connect MetaMask"}
                                     </Button>

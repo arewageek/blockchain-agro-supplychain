@@ -43,8 +43,7 @@ interface IFarmSupplyChain {
         uint256 _quantity,
         string memory _unit,
         uint256 _pricePerUnit,
-        string memory _originLocation,
-        uint256 _harvestDate
+        string memory _originLocation
     ) external;
 
     function processBatch(

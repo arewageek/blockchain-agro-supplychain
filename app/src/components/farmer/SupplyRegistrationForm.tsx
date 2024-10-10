@@ -62,6 +62,7 @@ export default function SupplyRegistrationForm() {
             functionName: 'registerBulkSupply',
             args: [productName, BigInt(parseInt(quantity)), unit, BigInt(pricePerUnit), factoryLocation, Date.now()]
         })
+        console.log({ hash: data.data, data })
 
         setIsSubmitting(false)
     }
@@ -76,7 +77,7 @@ export default function SupplyRegistrationForm() {
                 className: 'bg-green-600 text-white dark:bg-green-700',
             })
         }
-    }, [data.data])
+    }, [data.data, data.error])
 
     const { address, isConnecting } = useAccount()
     const { connectors } = useConnect()

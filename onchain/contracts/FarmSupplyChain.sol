@@ -60,12 +60,12 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         uint256 _quantity,
         string memory _unit,
         uint256 _pricePerUnit,
-        string memory _originLocation,
-        uint256 _harvestDate
-    ) public override onlyRole(FARMER_ROLE) whenNotPaused {
+        string memory _originLocation
+        // uint256 _harvestDate
+    ) public onlyRole(FARMER_ROLE) whenNotPaused {
         require(_quantity > 0, "Quantity must be greater than zero");
         require(_pricePerUnit > 0, "Price per unit must be greater than zero");
-        require(_harvestDate <= block.timestamp, "Harvest date cannot be in the future");
+        // require(_harvestDate <= block.timestamp, "Harvest date cannot be in the future");
 
         _bulkSupplyIds++;
         uint256 newSupplyId = _bulkSupplyIds;
@@ -78,7 +78,7 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         newSupply.unit = _unit;
         newSupply.pricePerUnit = _pricePerUnit;
         newSupply.originLocation = _originLocation;
-        newSupply.harvestDate = _harvestDate;
+        newSupply.harvestDate = block.timestamp;
         newSupply.state = SupplyState.Registered;
 
         farmerSupplies[msg.sender].push(newSupplyId);
@@ -90,14 +90,16 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         uint256 _bulkSupplyId,
         uint256 _quantity
     ) public onlyRole(PROCESSOR_ROLE) whenNotPaused {
-        require(bulkSupplies[_bulkSupplyId].state == SupplyState.Registered, "Bulk supply must be in Registered state");
-        require(bulkSupplies[_bulkSupplyId].quantity >= _quantity, "Insufficient quantity in bulk supply");
+        BulkSupply memory supply = bulkSupplies[_bulkSupplyId];
+
+        require(supply.state == SupplyState.Registered, "Bulk supply must be in Registered state");
+        require(supply.quantity >= _quantity, "Insufficient quantity in bulk supply");
         require(_quantity > 0, "Quantity must be greater than zero");
 
         _batchIds++;
         uint256 newBatchId = _batchIds;
 
-        ProcessedBatch storage newBatch = processedBatches[newBatchId];
+        ProcessedBatch memory newBatch;
         newBatch.id = newBatchId;
         newBatch.bulkSupplyId = _bulkSupplyId;
         newBatch.processor = msg.sender;
@@ -105,13 +107,16 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         newBatch.processingDate = block.timestamp;
         newBatch.state = SupplyState.Processed;
 
-        bulkSupplies[_bulkSupplyId].quantity -= _quantity;
-        if (bulkSupplies[_bulkSupplyId].quantity == 0) {
-            bulkSupplies[_bulkSupplyId].state = SupplyState.Processed;
+        supply.quantity -= _quantity;
+
+        if (supply.quantity == 0) {
+            supply.state = SupplyState.Processed;
         }
 
         bulkSupplyToBatches[_bulkSupplyId].push(newBatchId);
         processorBatches[msg.sender].push(newBatchId);
+
+        processedBatches[newBatchId] = newBatch;
 
         emit BatchProcessed(newBatchId, _bulkSupplyId, msg.sender, _quantity);
     }
