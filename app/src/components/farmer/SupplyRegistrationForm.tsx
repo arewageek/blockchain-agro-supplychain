@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from 'react-toastify'
 import { Loader2 } from "lucide-react"
-import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
+import { useAccount, useConnect, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { contractConfig } from '@/config/wagmi.config'
 
 export default function SupplyRegistrationForm() {
@@ -77,6 +77,9 @@ export default function SupplyRegistrationForm() {
             })
         }
     }, [data.data])
+
+    const { address, isConnecting } = useAccount()
+    const { connectors } = useConnect()
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -168,16 +171,29 @@ export default function SupplyRegistrationForm() {
                 />
             </div>
 
-            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isSubmitting}>
-                {isSubmitting ? (
-                    <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Registering...
-                    </>
-                ) : (
-                    'Register Supply'
-                )}
-            </Button>
+            {
+                address ? <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Registering...
+                        </>
+                    ) : (
+                        'Register Supply'
+                    )}
+                </Button> :
+                    <Button type="button" onClick={() => connectors[0].connect()} className="w-full bg-green-600 hover:bg-green-700" disabled={isConnecting}>
+                        {isConnecting ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Connecting...
+                            </>
+                        ) : (
+                            'Connect MetaMask'
+                        )}
+                    </Button>
+            }
+
         </form>
     )
 }

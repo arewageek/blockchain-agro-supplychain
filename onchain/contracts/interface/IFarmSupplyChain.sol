@@ -24,7 +24,6 @@ interface IFarmSupplyChain {
         uint256 bulkSupplyId;
         address processor;
         uint256 quantity;
-        string batchNumber;
         uint256 processingDate;
         string qualityGrade;
         SupplyState state;
@@ -50,8 +49,7 @@ interface IFarmSupplyChain {
 
     function processBatch(
         uint256 _bulkSupplyId,
-        uint256 _quantity,
-        string memory _batchNumber
+        uint256 _quantity
     ) external;
 
     function checkBatchQuality(uint256 _batchId, string memory _qualityGrade) external;
@@ -87,9 +85,22 @@ interface IFarmSupplyChain {
 
     function getRetailerUnits(address _retailer) external view returns (uint256[] memory);
 
+    // create and manage participants
+    
+    function createFarmer (address _farmer) external;
+    function removeFarmer (address _farmer) external;
+
+    function createProcessor (address _processor) external;
+    function removeProcessor (address _processor) external;
+
+    function createRetailer (address _retailer) external;
+    function removeRetailer (address _retailer) external;
+
+    function role (address account) external view returns (string memory);
+
     // Events
     event BulkSupplyRegistered(uint256 id, string name, address farmer, uint256 quantity, string unit, uint256 pricePerUnit);
-    event BatchProcessed(uint256 id, uint256 bulkSupplyId, address processor, uint256 quantity, string batchNumber);
+    event BatchProcessed(uint256 id, uint256 bulkSupplyId, address processor, uint256 quantity);
     event BatchQualityChecked(uint256 id, address inspector, string qualityGrade);
     event BatchDistributed(uint256 id, address distributor);
     event UnitRetailed(uint256 id, uint256 batchId, address retailer, uint256 price);

@@ -25,9 +25,11 @@ const AuthRedirectProvider = ({ children }: { children: ReactNode }) => {
         setRole(data?.[0].result as string)
     }, [data])
 
-    useEffect(() => {
-        role && role != 'CUSTOMER' && router.push(`${role.toLowerCase()}`)
-    }, [role])
+    role && role != 'CUSTOMER' && router.push(`/app/${role.toLowerCase()}`)
+
+    // useEffect(() => {
+    //     role && role != 'CUSTOMER' && router.push(`/app/${role.toLowerCase()}`)
+    // }, [role])
 
     return (
         <>{children}</>

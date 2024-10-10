@@ -42,8 +42,8 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         _setupRole("ADMIN_ROLE", msg.sender);
     }
 
-    modifier onlyRole(bytes32 role) {
-        require(roles[msg.sender] == role, "unauthorized caller");
+    modifier onlyRole(bytes32 _role) {
+        require(roles[msg.sender] == _role, "unauthorized caller");
         _;
     }
 
@@ -88,9 +88,8 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
 
     function processBatch(
         uint256 _bulkSupplyId,
-        uint256 _quantity,
-        string memory _batchNumber
-    ) public override onlyRole(PROCESSOR_ROLE) whenNotPaused {
+        uint256 _quantity
+    ) public onlyRole(PROCESSOR_ROLE) whenNotPaused {
         require(bulkSupplies[_bulkSupplyId].state == SupplyState.Registered, "Bulk supply must be in Registered state");
         require(bulkSupplies[_bulkSupplyId].quantity >= _quantity, "Insufficient quantity in bulk supply");
         require(_quantity > 0, "Quantity must be greater than zero");
@@ -103,7 +102,6 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         newBatch.bulkSupplyId = _bulkSupplyId;
         newBatch.processor = msg.sender;
         newBatch.quantity = _quantity;
-        newBatch.batchNumber = _batchNumber;
         newBatch.processingDate = block.timestamp;
         newBatch.state = SupplyState.Processed;
 
@@ -115,7 +113,7 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         bulkSupplyToBatches[_bulkSupplyId].push(newBatchId);
         processorBatches[msg.sender].push(newBatchId);
 
-        emit BatchProcessed(newBatchId, _bulkSupplyId, msg.sender, _quantity, _batchNumber);
+        emit BatchProcessed(newBatchId, _bulkSupplyId, msg.sender, _quantity);
     }
 
     function checkBatchQuality(uint256 _batchId, string memory _qualityGrade) public override onlyRole(QUALITY_INSPECTOR_ROLE) whenNotPaused {
@@ -229,9 +227,63 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         return retailerUnits[_retailer];
     }
 
+    // create and manage participants
+    
+    function createFarmer (address _farmer) external {
+        roles[_farmer] = FARMER_ROLE;
+    }
+    function removeFarmer (address _farmer) external {
+        roles[_farmer] = keccak256("CUSTOMER");
+    }
+
+    function createProcessor (address _processor) external {
+        roles[_processor] = PROCESSOR_ROLE;
+    }
+    function removeProcessor (address _processor) external {
+        roles[_processor] = keccak256("CUSTOMER");
+    }
+
+    function createRetailer (address _retailer) external {
+        roles[_retailer] = RETAILER_ROLE;
+    }
+    function removeRetailer (address _retailer) external {
+        roles[_retailer] = keccak256("CUSTOMER");
+    }
+
+    function role (address _account) external view returns (string memory) {
+        // 0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775 admin role
+        // 0xfbd454f36a7e1a388bd6fc3ab10d434aa4578f811acbbcf33afb1c697486313c distributor role
+        // 0x7c6181838a71a779e445600d4c6ecbe16bacf2b3c5bda69c29fada66d1b645d1 farmer role
+        // 0xe61decff6e4a5c6b5a3d3cbd28f882e595173563b49353ce5f31dba2de7f05ee processor role
+        // 0x66108bb9ee7f804cb1c563794e51989792a366e4b648e4b2b9189d9587e1880d quality inspector role
+        // 0x2a5f906c256a5d799494fcd066e1f6c077689de1cdb65052a1624de4bace99bf retailer role
+        
+        
+         bytes32 _role = roles[_account];
+        if(_role == FARMER_ROLE){
+            return "FARMER";
+        }
+        else if (_role == DISTRIBUTOR_ROLE){
+            return "DISTRIBUTOR";
+        }
+        else if (_role == FARMER_ROLE){
+            return "FARMER";
+        }
+        else if (_role == PROCESSOR_ROLE){
+            return "PROCESSOR";
+        }
+        else if (_role == QUALITY_INSPECTOR_ROLE) {
+            return "QUALITY INSPECTOR";
+        }
+        else if (_role == ADMIN_ROLE){
+            return "ADMIN";
+        }
+        else{
+            return "CUSTOMER";
+        }
+    }
+
 
     // internal functions
-    function _setupRole(string memory role, address operator) internal{
-
-    }
+    function _setupRole(string memory _role, address operator) internal{}
 }
