@@ -60,7 +60,7 @@ export default function SupplyRegistrationForm() {
         data.writeContract({
             ...contractConfig,
             functionName: 'registerBulkSupply',
-            args: [productName, BigInt(parseInt(quantity)), unit, BigInt(pricePerUnit), factoryLocation, Date.now()]
+            args: [productName, BigInt(parseInt(quantity)), unit, BigInt(pricePerUnit), factoryLocation]
         })
         console.log({ hash: data.data, data })
 
