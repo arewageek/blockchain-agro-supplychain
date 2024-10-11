@@ -15,7 +15,7 @@ interface IFarmSupplyChain {
         string unit;
         uint256 pricePerUnit;
         string originLocation;
-        uint256 harvestDate;
+        string qualityGrade;
         SupplyState state;
     }
 
@@ -51,6 +51,8 @@ interface IFarmSupplyChain {
         uint256 _quantity
     ) external;
 
+    function reportSupplyQuality(uint256 _supplyId, string memory _qualityGrade) external;
+
     function checkBatchQuality(uint256 _batchId, string memory _qualityGrade) external;
 
     function distributeBatch(uint256 _batchId) external;
@@ -69,7 +71,6 @@ interface IFarmSupplyChain {
         address consumer,
         string memory productName,
         string memory originLocation,
-        uint256 harvestDate,
         uint256 processingDate,
         string memory qualityGrade
     );
@@ -98,10 +99,11 @@ interface IFarmSupplyChain {
     function role (address account) external view returns (string memory);
 
     // Events
-    event BulkSupplyRegistered(uint256 id, string name, address farmer, uint256 quantity, string unit, uint256 pricePerUnit);
-    event BatchProcessed(uint256 id, uint256 bulkSupplyId, address processor, uint256 quantity);
-    event BatchQualityChecked(uint256 id, address inspector, string qualityGrade);
-    event BatchDistributed(uint256 id, address distributor);
-    event UnitRetailed(uint256 id, uint256 batchId, address retailer, uint256 price);
-    event UnitSold(uint256 id, address consumer);
+    event BulkSupplyRegistered(uint256 indexed id, string name, address indexed farmer, uint256 quantity, string unit, uint256 pricePerUnit);
+    event BatchProcessed(uint256 indexed id, uint256 indexed bulkSupplyId, address indexed processor, uint256 quantity);
+    event BatchQualityChecked(uint256 indexed id, address indexed inspector, string indexed qualityGrade);
+    event BatchDistributed(uint256 indexed id, address indexed distributor);
+    event UnitRetailed(uint256 indexed id, uint256 indexed batchId, address indexed retailer, uint256 price);
+    event UnitSold(uint256 indexed id, address indexed consumer);
+    event ReportSuplyQuality(uint indexed _supplyId, address indexed processor, string _qualityGrade);
 }

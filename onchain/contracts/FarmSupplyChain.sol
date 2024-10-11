@@ -78,9 +78,10 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         newSupply.unit = _unit;
         newSupply.pricePerUnit = _pricePerUnit;
         newSupply.originLocation = _originLocation;
-        newSupply.harvestDate = block.timestamp;
+        newSupply.qualityGrade = "Null";
         newSupply.state = SupplyState.Registered;
 
+        bulkSupplies[newSupplyId] = newSupply;
         farmerSupplies[msg.sender].push(newSupplyId);
 
         emit BulkSupplyRegistered(newSupplyId, _name, msg.sender, _quantity, _unit, _pricePerUnit);
@@ -119,6 +120,14 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         processedBatches[newBatchId] = newBatch;
 
         emit BatchProcessed(newBatchId, _bulkSupplyId, msg.sender, _quantity);
+    }
+
+    function reportSupplyQuality(uint256 _supplyId, string memory _qualityGrade) external override onlyRole(PROCESSOR_ROLE) whenNotPaused {
+        BulkSupply memory supply = bulkSupplies[_supplyId];
+        require(supply.state == SupplyState.Registered, "Supplies must be registered");
+        bulkSupplies[_supplyId].qualityGrade = _qualityGrade;
+
+        emit ReportSuplyQuality(_supplyId, msg.sender, _qualityGrade);
     }
 
     function checkBatchQuality(uint256 _batchId, string memory _qualityGrade) public override onlyRole(QUALITY_INSPECTOR_ROLE) whenNotPaused {
@@ -187,7 +196,6 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         address consumer,
         string memory productName,
         string memory originLocation,
-        uint256 harvestDate,
         uint256 processingDate,
         string memory qualityGrade
     ) {
@@ -205,7 +213,6 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
             unit.consumer,
             supply.name,
             supply.originLocation,
-            supply.harvestDate,
             batch.processingDate,
             batch.qualityGrade
         );
