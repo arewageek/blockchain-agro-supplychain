@@ -186,7 +186,7 @@ export default function ProcessorDashboard() {
                                 <Input id="bulkSupplyId" name="bulkSupplyId" placeholder="Enter Bulk Supply ID" />
                             </div>
                             <div>
-                                <Label htmlFor="quantity">Quantity (kg)</Label>
+                                <Label htmlFor="quantity">Quantity</Label>
                                 <Input id="quantity" name="quantity" type="number" placeholder="Enter quantity" />
                             </div>
                             <div>
@@ -234,7 +234,7 @@ export default function ProcessorDashboard() {
                             <p><strong>ID:</strong> {trackedBatch.id}</p>
                             <p><strong>Bulk Supply ID:</strong> {trackedBatch.bulkSupplyId}</p>
                             <p><strong>Processor:</strong> {trackedBatch.processor}</p>
-                            <p><strong>Quantity:</strong> {trackedBatch.quantity} kg</p>
+                            <p><strong>Quantity:</strong> {trackedBatch.quantity}</p>
                             <p><strong>Processing Date:</strong> {new Date(trackedBatch.processingDate * 1000).toLocaleDateString()}</p>
                             <p><strong>Quality Grade:</strong> {trackedBatch.qualityGrade}</p>
                             <p><strong>State:</strong> {trackedBatch.state}</p>
@@ -242,6 +242,7 @@ export default function ProcessorDashboard() {
                     )}
                 </CardContent>
             </Card>
+
         </div>
     );
 }

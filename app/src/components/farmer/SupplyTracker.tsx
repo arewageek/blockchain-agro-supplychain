@@ -137,9 +137,9 @@ export default function SupplyTracker() {
                         </p>
 
                         <p className="flex items-center space-x-2">
-                            <span className="font-semibold">Harvest Date:</span>
+                            <span className="font-semibold">Quality Grade:</span>
                             <Calendar className="w-4 h-4 text-green-500" />
-                            <span>{Number(supplyStatus[7])}</span>
+                            <span>{supplyStatus[7]}</span>
                         </p>
 
                         <p className="flex items-center space-x-2">

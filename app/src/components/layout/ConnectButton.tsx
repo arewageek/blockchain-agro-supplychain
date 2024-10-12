@@ -45,7 +45,7 @@ const ConnectButton = ({ classes }: { classes?: string }) => {
                                 <DropdownMenuSeparator />
                                 <DropdownMenuRadioGroup >
                                     {
-                                        connectors.map(connector => <div className='cursor-pointer p-2 hover:bg-gray-100' onClick={() => connector.connect()} key={connector.name}>{connector.name}</div>)
+                                        connectors.map(connector => <div className='cursor-pointer p-2 hover:bg-gray-100' onClick={() => connector.connect()} key={crypto.randomUUID()}>{connector.name}</div>)
                                     }
                                 </DropdownMenuRadioGroup></>
                     }
