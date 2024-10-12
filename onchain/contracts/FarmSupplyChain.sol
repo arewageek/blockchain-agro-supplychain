@@ -130,7 +130,7 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         emit ReportSuplyQuality(_supplyId, msg.sender, _qualityGrade);
     }
 
-    function checkBatchQuality(uint256 _batchId, string memory _qualityGrade) public override onlyRole(QUALITY_INSPECTOR_ROLE) whenNotPaused {
+    function reportBatchQuality(uint256 _batchId, string memory _qualityGrade) public override onlyRole(QUALITY_INSPECTOR_ROLE) whenNotPaused {
         require(processedBatches[_batchId].state == SupplyState.Processed, "Batch must be in Processed state");
         processedBatches[_batchId].qualityGrade = _qualityGrade;
         processedBatches[_batchId].state = SupplyState.QualityChecked;
@@ -144,8 +144,9 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
     }
 
     function createRetailUnits(uint256 _batchId, uint256 _quantity, uint256 _pricePerUnit) public override onlyRole(RETAILER_ROLE) whenNotPaused {
-        require(processedBatches[_batchId].state == SupplyState.Distributed, "Batch must be in Distributed state");
-        require(processedBatches[_batchId].quantity >= _quantity, "Insufficient quantity in batch");
+        ProcessedBatch memory batch = processedBatches[_batchIds];
+        require(batch.state == SupplyState.Distributed, "Batch must be in Distributed state");
+        require(batch.quantity >= _quantity, "Insufficient quantity in batch");
         require(_quantity > 0, "Quantity must be greater than zero");
         require(_pricePerUnit > 0, "Price per unit must be greater than zero");
 
@@ -153,7 +154,7 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
             _unitIds++;
             uint256 newUnitId = _unitIds;
 
-            RetailUnit storage newUnit = retailUnits[newUnitId];
+            RetailUnit memory newUnit = retailUnits[newUnitId];
             newUnit.id = newUnitId;
             newUnit.batchId = _batchId;
             newUnit.retailer = msg.sender;
@@ -167,6 +168,7 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         }
 
         processedBatches[_batchId].quantity -= _quantity;
+
         if (processedBatches[_batchId].quantity == 0) {
             processedBatches[_batchId].state = SupplyState.Retailed;
         }
@@ -271,7 +273,7 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         // 0x2a5f906c256a5d799494fcd066e1f6c077689de1cdb65052a1624de4bace99bf retailer role
         
         
-         bytes32 _role = roles[_account];
+        bytes32 _role = roles[_account];
         if(_role == FARMER_ROLE){
             return "FARMER";
         }

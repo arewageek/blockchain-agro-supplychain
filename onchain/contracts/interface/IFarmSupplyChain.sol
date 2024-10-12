@@ -53,7 +53,7 @@ interface IFarmSupplyChain {
 
     function reportSupplyQuality(uint256 _supplyId, string memory _qualityGrade) external;
 
-    function checkBatchQuality(uint256 _batchId, string memory _qualityGrade) external;
+    function reportBatchQuality(uint256 _batchId, string memory _qualityGrade) external;
 
     function distributeBatch(uint256 _batchId) external;
 
