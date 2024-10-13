@@ -11,6 +11,7 @@ import { useAccount, useConnect, useWriteContract } from 'wagmi';
 import { configWagmi, contractConfig } from '@/config/wagmi.config';
 import { readContract, writeContract } from '@wagmi/core';
 import { toast } from 'react-toastify';
+import { randomIdGenerator } from '@/lib/randomIdGenerator';
 
 // Define the SupplyState enum
 enum SupplyState {
@@ -58,6 +59,7 @@ export default function ProcessorDashboard() {
         totalSuppliesReceived: 1234,
         averageQualityGrade: 'A'
     });
+    const [uuid, setUuid] = useState<number>()
 
     const { writeContract, error, isError, isPending, data: trxHash, isSuccess, context } = useWriteContract()
 
@@ -105,11 +107,13 @@ export default function ProcessorDashboard() {
         };
 
         console.log({ newBatch })
+        const batchUUID = randomIdGenerator()
+        setUuid(batchUUID)
 
         writeContract({
             ...contractConfig,
             functionName: 'processBatch',
-            args: [BigInt(newBatch.bulkSupplyId), BigInt(newBatch.quantity)]
+            args: [BigInt(batchUUID), BigInt(newBatch.bulkSupplyId), BigInt(newBatch.quantity)]
         })
 
     }
@@ -202,6 +206,11 @@ export default function ProcessorDashboard() {
                                     </SelectContent>
                                 </Select>
                             </div>
+
+                            {uuid && <div className='py-3 text-sm font-bold text-green-600'>
+                                New Batch Id Generated: {uuid}
+                            </div>}
+
                             {
                                 address ? <Button type="submit" className="w-full">{
                                     isPending ? "Processing..." : "Create Batch"

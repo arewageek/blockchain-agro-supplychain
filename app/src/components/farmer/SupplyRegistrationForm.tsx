@@ -9,6 +9,7 @@ import { toast } from 'react-toastify'
 import { Loader2 } from "lucide-react"
 import { useAccount, useConnect, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { contractConfig } from '@/config/wagmi.config'
+import { randomIdGenerator } from '@/lib/randomIdGenerator'
 
 export default function SupplyRegistrationForm() {
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -21,6 +22,7 @@ export default function SupplyRegistrationForm() {
         factoryLocation: "",
         pricePerUnit: 0
     })
+    const [supplyId, setSupplyId] = useState<number>()
 
     const data = useWriteContract()
 
@@ -45,6 +47,9 @@ export default function SupplyRegistrationForm() {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000))
 
+        const uuid = randomIdGenerator()
+        setSupplyId(uuid)
+
         setFormData({
             productName: "",
             quantity: "",
@@ -60,7 +65,7 @@ export default function SupplyRegistrationForm() {
         data.writeContract({
             ...contractConfig,
             functionName: 'registerBulkSupply',
-            args: [productName, BigInt(parseInt(quantity)), unit, BigInt(pricePerUnit), factoryLocation]
+            args: [BigInt(uuid), productName, BigInt(parseInt(quantity)), unit, BigInt(pricePerUnit), factoryLocation]
         })
         console.log({ hash: data.data, data })
 
@@ -171,6 +176,10 @@ export default function SupplyRegistrationForm() {
                     className="bg-green-50 dark:bg-green-900"
                 />
             </div>
+
+            {supplyId && <div className='py-3 text-sm font-bold text-green-600'>
+                New Supply Id Generated: {supplyId}
+            </div>}
 
             {
                 address ? <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isSubmitting}>

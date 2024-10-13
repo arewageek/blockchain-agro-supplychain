@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Scan, Leaf, LeafIcon, FactoryIcon, ShoppingCartIcon } from 'lucide-react'
+import { Scan, Leaf, LeafIcon, FactoryIcon, ShoppingCartIcon, User } from 'lucide-react'
 import AuthRedirectProvider from '@/providers/AuthRedirectProvider'
 import Link from 'next/link'
 
@@ -70,6 +70,13 @@ const dummyProducts: IProduct[] = [
         distributor: 'Sweet Treats',
         retailer: 'Health Food Store'
     },
+]
+
+const roles = [
+    { name: "Admin", icon: <User />, path: "/admin" },
+    { name: "Farmer", icon: <Leaf />, path: "/farmer" },
+    { name: "Processor", icon: <FactoryIcon />, path: "/processor" },
+    { name: "Retailer", icon: <ShoppingCartIcon />, path: "/retailer" },
 ]
 
 export default function DashboardPage() {
@@ -176,45 +183,21 @@ export default function DashboardPage() {
                             <CardTitle>Quick Links</CardTitle>
                         </CardHeader>
                         <CardContent className="flex flex-col space-y-4">
-                            <Link href="/app/farmer" className="quick-link-card">
-                                <div className="flex items-center justify-between p-4 rounded-lg bg-white shadow-md">
-                                    <div className="flex items-center">
-                                        <div className="pr-3 text-green-500">
-                                            <LeafIcon />
+                            {roles.map(role => (
+                                <Link href={`/app${role.path}`} className="quick-link-card" key={crypto.randomUUID()}>
+                                    <div className="flex items-center justify-between p-4 rounded-lg bg-white shadow-md">
+                                        <div className="flex items-center">
+                                            <div className="pr-3 text-green-500">
+                                                {role.icon}
+                                            </div>
+                                            <h3 className="text-lg font-bold">{role.name} Dashboard</h3>
                                         </div>
-                                        <h3 className="text-lg font-bold">Farmer Dashboard</h3>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                                            <path d="M12 14l4-4-4-4H6l4 4 4 4z" />
+                                        </svg>
                                     </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                                        <path d="M12 14l4-4-4-4H6l4 4 4 4z" />
-                                    </svg>
-                                </div>
-                            </Link>
-                            <Link href="/app/processor" className="quick-link-card">
-                                <div className="flex items-center justify-between p-4 rounded-lg bg-white shadow-md">
-                                    <div className="flex items-center">
-                                        <div className="pr-3 text-green-500">
-                                            <FactoryIcon />
-                                        </div>
-                                        <h3 className="text-lg font-bold">Processor Dashboard</h3>
-                                    </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                                        <path d="M12 14l4-4-4-4H6l4 4 4 4z" />
-                                    </svg>
-                                </div>
-                            </Link>
-                            <Link href="/app/retailer" className="quick-link-card">
-                                <div className="flex items-center justify-between p-4 rounded-lg bg-white shadow-md">
-                                    <div className="flex items-center">
-                                        <div className="pr-3 text-green-500">
-                                            <ShoppingCartIcon />
-                                        </div>
-                                        <h3 className="text-lg font-bold">Retailer Dashboard</h3>
-                                    </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                                        <path d="M12 14l4-4-4-4H6l4 4 4 4z" />
-                                    </svg>
-                                </div>
-                            </Link>
+                                </Link>
+                            ))}
                         </CardContent>
                     </Card>
                 </div>

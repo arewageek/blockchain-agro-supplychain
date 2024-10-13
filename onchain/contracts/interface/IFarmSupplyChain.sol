@@ -39,6 +39,7 @@ interface IFarmSupplyChain {
     }
 
     function registerBulkSupply(
+        uint256 _suppylId,
         string memory _name,
         uint256 _quantity,
         string memory _unit,
@@ -47,6 +48,7 @@ interface IFarmSupplyChain {
     ) external;
 
     function processBatch(
+        uint256 _batchId,
         uint256 _bulkSupplyId,
         uint256 _quantity
     ) external;
@@ -57,7 +59,7 @@ interface IFarmSupplyChain {
 
     function distributeBatch(uint256 _batchId) external;
 
-    function createRetailUnits(uint256 _batchId, uint256 _quantity, uint256 _pricePerUnit) external;
+    function createRetailUnits(uint256 _retailId, uint256 _batchId, uint256 _quantity, uint256 _pricePerUnit) external;
 
     function sellUnit(uint256 _unitId) external payable;
 
@@ -86,15 +88,9 @@ interface IFarmSupplyChain {
     function getRetailerUnits(address _retailer) external view returns (uint256[] memory);
 
     // create and manage participants
-    
-    function createFarmer (address _farmer) external;
-    function removeFarmer (address _farmer) external;
 
-    function createProcessor (address _processor) external;
-    function removeProcessor (address _processor) external;
-
-    function createRetailer (address _retailer) external;
-    function removeRetailer (address _retailer) external;
+    function createRole (address _account, string memory _role) external;
+    function removeRole (address _account) external;
 
     function role (address account) external view returns (string memory);
 

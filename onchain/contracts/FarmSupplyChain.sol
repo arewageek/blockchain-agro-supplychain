@@ -39,7 +39,7 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
 
     constructor() {
         // _setupRole(", msg.sender);
-        _setupRole("ADMIN_ROLE", msg.sender);
+        _setupRole(msg.sender, "ADMIN_ROLE");
     }
 
     modifier onlyRole(bytes32 _role) {
@@ -56,6 +56,7 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
     }
 
     function registerBulkSupply(
+        uint256 _supplyId,
         string memory _name,
         uint256 _quantity,
         string memory _unit,
@@ -67,11 +68,11 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         require(_pricePerUnit > 0, "Price per unit must be greater than zero");
         // require(_harvestDate <= block.timestamp, "Harvest date cannot be in the future");
 
-        _bulkSupplyIds++;
-        uint256 newSupplyId = _bulkSupplyIds;
+        // _bulkSupplyIds++;
+        // uint256 newSupplyId = _bulkSupplyIds;
 
-        BulkSupply storage newSupply = bulkSupplies[newSupplyId];
-        newSupply.id = newSupplyId;
+        BulkSupply storage newSupply = bulkSupplies[_supplyId];
+        newSupply.id = _supplyId;
         newSupply.name = _name;
         newSupply.farmer = msg.sender;
         newSupply.quantity = _quantity;
@@ -81,13 +82,14 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         newSupply.qualityGrade = "Null";
         newSupply.state = SupplyState.Registered;
 
-        bulkSupplies[newSupplyId] = newSupply;
-        farmerSupplies[msg.sender].push(newSupplyId);
+        bulkSupplies[_supplyId] = newSupply;
+        farmerSupplies[msg.sender].push(_supplyId);
 
-        emit BulkSupplyRegistered(newSupplyId, _name, msg.sender, _quantity, _unit, _pricePerUnit);
+        emit BulkSupplyRegistered(_supplyId, _name, msg.sender, _quantity, _unit, _pricePerUnit);
     }
 
     function processBatch(
+        uint256 _batchId,
         uint256 _bulkSupplyId,
         uint256 _quantity
     ) public onlyRole(PROCESSOR_ROLE) whenNotPaused {
@@ -97,11 +99,11 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         require(supply.quantity >= _quantity, "Insufficient quantity in bulk supply");
         require(_quantity > 0, "Quantity must be greater than zero");
 
-        _batchIds++;
-        uint256 newBatchId = _batchIds;
+        // _batchIds++;
+        // uint256 newBatchId = _batchIds;
 
         ProcessedBatch memory newBatch;
-        newBatch.id = newBatchId;
+        newBatch.id = _batchId;
         newBatch.bulkSupplyId = _bulkSupplyId;
         newBatch.processor = msg.sender;
         newBatch.quantity = _quantity;
@@ -114,12 +116,12 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
             supply.state = SupplyState.Processed;
         }
 
-        bulkSupplyToBatches[_bulkSupplyId].push(newBatchId);
-        processorBatches[msg.sender].push(newBatchId);
+        bulkSupplyToBatches[_bulkSupplyId].push(_batchId);
+        processorBatches[msg.sender].push(_batchId);
 
-        processedBatches[newBatchId] = newBatch;
+        processedBatches[_batchId] = newBatch;
 
-        emit BatchProcessed(newBatchId, _bulkSupplyId, msg.sender, _quantity);
+        emit BatchProcessed(_batchId, _bulkSupplyId, msg.sender, _quantity);
     }
 
     function reportSupplyQuality(uint256 _supplyId, string memory _qualityGrade) external override onlyRole(PROCESSOR_ROLE) whenNotPaused {
@@ -143,7 +145,7 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         emit BatchDistributed(_batchId, msg.sender);
     }
 
-    function createRetailUnits(uint256 _batchId, uint256 _quantity, uint256 _pricePerUnit) public override onlyRole(RETAILER_ROLE) whenNotPaused {
+    function createRetailUnits(uint256 _retailId, uint256 _batchId, uint256 _quantity, uint256 _pricePerUnit) public override onlyRole(RETAILER_ROLE) whenNotPaused {
         ProcessedBatch memory batch = processedBatches[_batchIds];
         require(batch.state == SupplyState.Distributed, "Batch must be in Distributed state");
         require(batch.quantity >= _quantity, "Insufficient quantity in batch");
@@ -151,20 +153,20 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         require(_pricePerUnit > 0, "Price per unit must be greater than zero");
 
         for (uint256 i = 0; i < _quantity; i++) {
-            _unitIds++;
-            uint256 newUnitId = _unitIds;
+            // _unitIds++;
+            // uint256 newUnitId = _unitIds;
 
-            RetailUnit memory newUnit = retailUnits[newUnitId];
-            newUnit.id = newUnitId;
+            RetailUnit memory newUnit = retailUnits[_retailId];
+            newUnit.id = _retailId;
             newUnit.batchId = _batchId;
             newUnit.retailer = msg.sender;
             newUnit.price = _pricePerUnit;
             newUnit.state = SupplyState.Retailed;
 
-            batchToUnits[_batchId].push(newUnitId);
-            retailerUnits[msg.sender].push(newUnitId);
+            batchToUnits[_batchId].push(_retailId);
+            retailerUnits[msg.sender].push(_retailId);
 
-            emit UnitRetailed(newUnitId, _batchId, msg.sender, _pricePerUnit);
+            emit UnitRetailed(_retailId, _batchId, msg.sender, _pricePerUnit);
         }
 
         processedBatches[_batchId].quantity -= _quantity;
@@ -242,26 +244,13 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
     }
 
     // create and manage participants
-    
-    function createFarmer (address _farmer) external {
-        roles[_farmer] = FARMER_ROLE;
-    }
-    function removeFarmer (address _farmer) external {
-        roles[_farmer] = keccak256("CUSTOMER");
+
+    function createRole (address _account, string memory _role) external onlyRole(ADMIN_ROLE){
+        _setupRole(_account, _role);
     }
 
-    function createProcessor (address _processor) external {
-        roles[_processor] = PROCESSOR_ROLE;
-    }
-    function removeProcessor (address _processor) external {
-        roles[_processor] = keccak256("CUSTOMER");
-    }
-
-    function createRetailer (address _retailer) external {
-        roles[_retailer] = RETAILER_ROLE;
-    }
-    function removeRetailer (address _retailer) external {
-        roles[_retailer] = keccak256("CUSTOMER");
+    function removeRole (address _account) external onlyRole(ADMIN_ROLE) {
+        roles[_account] = keccak256("CUSTOMER_ROLE");
     }
 
     function role (address _account) external view returns (string memory) {
@@ -280,9 +269,6 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
         else if (_role == DISTRIBUTOR_ROLE){
             return "DISTRIBUTOR";
         }
-        else if (_role == FARMER_ROLE){
-            return "FARMER";
-        }
         else if (_role == PROCESSOR_ROLE){
             return "PROCESSOR";
         }
@@ -299,5 +285,7 @@ contract FarmSupplyChain is IFarmSupplyChain, ReentrancyGuard, Pausable {
 
 
     // internal functions
-    function _setupRole(string memory _role, address operator) internal{}
+    function _setupRole(address _account, string memory _role) internal{
+        roles[_account] = keccak256(abi.encodePacked(_role));
+    }
 }

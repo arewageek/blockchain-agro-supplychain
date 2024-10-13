@@ -13,6 +13,6 @@ export const configWagmi = createConfig({
 });
 
 export const contractConfig = {
-  address: "0xDAf22FC38858005aA9943ED20B4AcFC42518AE56",
+  address: "0x2EBaB630000AA7a1aee08B89A3A03f402Ab455D0",
   abi: farmSupplyChain.abi,
 } as const;
