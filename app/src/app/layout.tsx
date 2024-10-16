@@ -33,7 +33,13 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100">
-            {children}
+            {/* {children} */}
+
+            <div className="flex items-center justify-center h-screen w-screen">
+              <h2 className="text-4xl font-bold text-red-500">
+                SITE SUSPENDED!
+              </h2>
+            </div>
           </div>
           <ToastContainer />
         </body>
