@@ -9,68 +9,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Scan, Leaf, LeafIcon, FactoryIcon, ShoppingCartIcon, User } from 'lucide-react'
 import AuthRedirectProvider from '@/providers/AuthRedirectProvider'
 import Link from 'next/link'
+import { configWagmi, contractConfig } from '@/config/wagmi.config'
+import { readContract } from '@wagmi/core'
 
 // Dummy data for product information
 interface IProduct {
     id: string, name: string, farmer: string, harvestDate: string, processingDate: string, retailer: string, distributor: string
 }
-
-const dummyProducts: IProduct[] = [
-    {
-        id: "PROD001",
-        name: 'Organic Apples',
-        farmer: 'Green Acres Farm',
-        harvestDate: '2023-09-15',
-        processingDate: '2023-09-17',
-        distributor: 'Fresh Fruits Co.',
-        retailer: 'Wholesome Market'
-    },
-    {
-        id: "PROD002",
-        name: 'Free-Range Eggs',
-        farmer: 'Happy Hens Farm',
-        harvestDate: '2023-10-01',
-        processingDate: '2023-10-02',
-        distributor: 'Farm Fresh Distributors',
-        retailer: 'Local Grocery'
-    },
-    {
-        id: "PROD003",
-        name: 'Organic Carrots',
-        farmer: 'Sunny Fields Farm',
-        harvestDate: '2023-10-10',
-        processingDate: '2023-10-12',
-        distributor: 'Fresh Produce Inc.',
-        retailer: 'Farmers Market'
-    },
-    {
-        id: "PROD004",
-        name: 'Honey',
-        farmer: 'Bee Happy Apiary',
-        harvestDate: '2023-11-05',
-        processingDate: '2023-11-07',
-        distributor: 'Sweet Treats',
-        retailer: 'Health Food Store'
-    },
-    {
-        id: "PROD005",
-        name: 'Organic Spinach',
-        farmer: 'Leafy Greens Farm',
-        harvestDate: '2023-12-01',
-        processingDate: '2023-12-03',
-        distributor: 'Fresh Veggies',
-        retailer: 'Grocery Store'
-    },
-    {
-        id: "PROD006",
-        name: 'Local Honey',
-        farmer: 'Beehive Farms',
-        harvestDate: '2024-01-15',
-        processingDate: '2024-01-17',
-        distributor: 'Sweet Treats',
-        retailer: 'Health Food Store'
-    },
-]
+interface UnitHistory {
+    id: number;
+    batchId: number;
+    supplyId: number,
+    farmer: string,
+    processor: string;
+    retailer: string,
+    consumer?: string,
+    productName?: string,
+    factory: string;
+    processingDate: number;
+    qualityGrade: string;
+}
 
 const roles = [
     { name: "Admin", icon: <User />, path: "/admin" },
@@ -80,69 +38,69 @@ const roles = [
 ]
 
 export default function DashboardPage() {
-    const [productId, setProductId] = useState<string>('')
-    const [productInfo, setProductInfo] = useState<IProduct | null>()
-    const [isQRDialogOpen, setIsQRDialogOpen] = useState(false)
+    const [trackedUnit, setTrackedUnit] = useState<UnitHistory | null>(null);
+    const [unitId, setUnitId] = useState('');
 
-    const handleProductSearch = (e: React.FormEvent) => {
-        e.preventDefault()
-        const productSelection = dummyProducts.find(product => product.id == productId)
-        const info = productSelection
-        setProductInfo(info || null)
-        if (!info) {
-            alert('Product not found')
-        }
-    }
+    const handleTrackUnit = async () => {
+        const data: any = await readContract(configWagmi, {
+            ...contractConfig,
+            functionName: 'getUnitHistory',
+            args: [BigInt(unitId)]
+        })
 
-    const handleQRScan = () => {
-        // Simulating QR scan by using a random product ID
-        const product: IProduct = dummyProducts[Math.floor(Math.random() * dummyProducts.length)]
-        setProductId(product.id)
-        setProductInfo(product)
-        setIsQRDialogOpen(false)
-    }
+        console.log({ data })
+
+        setTrackedUnit({
+            id: Number(data[0]),
+            batchId: Number(data[1]),
+            supplyId: Number(data[2]),
+            farmer: data[3],
+            processor: data[4],
+            retailer: data[5],
+            factory: data[8],
+            processingDate: Number(data[9]),
+            qualityGrade: data[10]
+        });
+    };
 
     return (
+
         <AuthRedirectProvider>
             <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100 p-8">
                 <div className="max-w-4xl mx-auto">
                     <h1 className="text-3xl font-bold mb-8 text-center">Product Tracking Dashboard</h1>
 
-                    <Card className="mb-8">
+                    <Card className="mt-8">
                         <CardHeader>
-                            <CardTitle>Track a Product</CardTitle>
+                            <CardTitle className="text-primary">Track Units</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <form onSubmit={handleProductSearch} className="flex items-center space-x-2">
+                            <div className="flex space-x-2 mb-4">
                                 <Input
-                                    type="text"
                                     placeholder="Enter Product ID"
-                                    value={productId}
-                                    onChange={(e) => setProductId(e.target.value)}
-                                    className="flex-grow"
+                                    value={unitId}
+                                    onChange={(e) => setUnitId(e.target.value)}
                                 />
-                                <Button type="submit">Track</Button>
-                                <Dialog open={isQRDialogOpen} onOpenChange={setIsQRDialogOpen}>
-                                    <DialogTrigger asChild>
-                                        <Button variant="outline">
-                                            <Scan className="h-5 w-5 mr-2" />
-                                            Scan QR
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Scan QR Code</DialogTitle>
-                                        </DialogHeader>
-                                        <div className="flex items-center justify-center h-64 bg-gray-100 rounded-md">
-                                            <Button onClick={handleQRScan}>Simulate QR Scan</Button>
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
-                            </form>
+                                <Button onClick={handleTrackUnit}>Track Item</Button>
+                            </div>
+                            {trackedUnit && (
+                                <div className="bg-secondary p-4 rounded-md">
+                                    <h3 className="font-semibold mb-2 text-primary">Batch Details:</h3>
+                                    <p><strong>ID:</strong> {trackedUnit.id}</p>
+                                    <p><strong>Bulk Batch ID:</strong> {trackedUnit.batchId}</p>
+                                    <p><strong>Bulk Supply ID:</strong> {trackedUnit.supplyId}</p>
+                                    <p><strong>Processor:</strong> {trackedUnit.farmer}</p>
+                                    <p><strong>Processor:</strong> {trackedUnit.processor}</p>
+                                    <p><strong>Processor:</strong> {trackedUnit.retailer}</p>
+                                    <p><strong>Quantity:</strong> {trackedUnit.factory}</p>
+                                    <p><strong>Processing Date:</strong> {new Date(trackedUnit.processingDate * 1000).toLocaleDateString()}</p>
+                                    <p><strong>Quality Grade:</strong> {trackedUnit.qualityGrade}</p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 
-                    {productInfo && (
+                    {/* {productInfo && (
                         <Card>
                             <CardHeader>
                                 <CardTitle>Product Information</CardTitle>
@@ -176,7 +134,7 @@ export default function DashboardPage() {
                                 </div>
                             </CardContent>
                         </Card>
-                    )}
+                    )} */}
 
                     <Card className="mb-8">
                         <CardHeader>
@@ -202,6 +160,6 @@ export default function DashboardPage() {
                     </Card>
                 </div>
             </div>
-        </AuthRedirectProvider>
+        </AuthRedirectProvider >
     )
 }
